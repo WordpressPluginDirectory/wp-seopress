@@ -6,7 +6,7 @@ Tags: SEO, google search console, xml sitemap, schema, ai
 Requires at least: 5.0+
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 8.1.1
+Stable tag: 8.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,7 +80,8 @@ SEOPress is a powerful WordPress SEO plugin to optimize your SEO, boost your tra
 [youtube https://youtu.be/zxGCY-bJYwE]
 
 <ul>
-	<li><a href="https://www.seopress.org/features/openai/" target="_blank"><strong>Use Artificial Intelligence (GPT 4 / Vision and GPT 3.5 Turbo) to generate SEO metadata and alternative texts for image files. Bulk actions supported.</li>
+	<li><a href="https://www.seopress.org/features/openai/" target="_blank"><strong>Use Artificial Intelligence (GPT 4 / Vision and GPT 3.5 Turbo) to generate SEO metadata and alternative texts for image files. Bulk actions supported.</strong></li>
+	<li><a href="https://www.seopress.org/features/site-audit/" target="_blank"><strong>Site Audit: Detect technical issues that could harm your site's SEO directly from your WordPress administration.</strong></li>
     <li><a href="https://www.seopress.org/features/seo-alerts/" target="_blank">Receive SEO alerts to prevent breaking your SEO before it's too late</a></li>
 	<li><a href="https://www.seopress.org/support/guides/import-metadata-from-a-csv-file-with-seopress-pro/" target="_blank"><strong>Import / export metadata</strong></a> (titles, open graph, robots...) from / to CSV file</li>
 	<li><a href="https://www.seopress.org/features/sitemaps/" target="_blank"><strong>Video XML Sitemap</strong></a> to improve rankings in video search results. YouTube videos are automatically added.</li>
@@ -261,27 +262,31 @@ You're theme is probably using a deprecated function to handle the title. <a hre
 12. Schema metabox
 
 == Changelog ==
-= 8.1.1 =
-* FIX Fatal error undefined function
+= 8.3.1 =
+* FIX Prevent fatal error to set default values
 
-= 8.1 <a href="https://www.seopress.org/newsroom/product-news/seopress-8-1/">Read the blog post update</a> =
-* NEW Enhanced SEOPress dashboard 🎉
-* NEW Better onboarding with our wizard Installation 🎉
-* NEW 'seopress_sitemaps_xml_news_name' hook to filter Google News name for XML News sitemap (https://www.seopress.org/support/hooks/filter-google-news-name-for-xml-news-sitemap/)
-* INFO Move Search rewrite URL setting to SEO, Advanced, Advanced tab (it's necessary to go this screen and save again the settings)
-* INFO Add a quick link to manage notifications in the email sent by our SEO alerts feature (PRO)
-* INFO Add support for EDD PRO to remove the meta generator
-* INFO Disable automatically the HTML microdata for breadcrumbs if JSON breadcrumbs is activated
-* INFO Add a notice if LiteSpeed caching plugin is enabled to fix potential compatibility issues
-* INFO CSV export tool: "post_type" and "taxonomy" columns added
-* FIX CSV import tool to prevent potential conflicts in specific cases
-* FIX Breadcrumbs schema.org/WebPage URL
-* FIX "Your GA4 property ID is incorrectly set!" notification
-* FIX An issue with custom tracking outputting "none" values in source code
-* FIX Fatal error for Matomo stats in dashboard on init if no data
-* FIX SEOPRESSMedia is not defined in Media Library when using the AI feature to generate alt text (PRO)
-* FIX Fatal error: Updating PRO with multisite setup
-* FIX Missing primary category select for WC products from the product categories metabox
+= 8.3 <a href="https://www.seopress.org/newsroom/product-news/seopress-8-3/">Read the blog post update</a> =
+* NEW Site Audit #2 iteration 🎉 (PRO)
+- Improved CSV export functionality
+- Option to select which post types to scan from the settings
+- Added an "Ignore" button for each issue
+- Receive an email alert when the site audit task is completed
+- Added site audit scan duration
+- Enhanced user interface
+- Improved column ordering and sorting
+- Enhanced the seopress_site_audit_query hook
+- Fix false positives
+* NEW Automatically set alt text on already inserted image (SEO, Advanced, Image SEO tab) 🎉
+* NEW "seopress_dashboard_site_overview_tabs" to filter the tabs of the Dashboard Site Overview block (https://www.seopress.org/support/hooks/filter-tabs-in-the-dashboard-site-overview-block/)
+* NEW Add new default WooCommerce rules button to robots.txt tab (PRO)
+* NEW 'seopress_instant_indexing_permalink' hook to filter URL sent automatically to IndexNow API (https://www.seopress.org/support/hooks/filter-post-object-sent-automatically-to-indexnow-api/)
+* NEW 'seopress_site_audit_after_processs' hook to run action after site audit is completed (https://www.seopress.org/support/hooks/run-action-after-site-audit-is-completed/)
+* INFO The notification “You don’t have an XML sitemap!” can now be ignored
+* INFO Improve compatibility with Malcare plugin
+* INFO Add a notice for The7 theme to invite users to disable SEO settings to avoid any compatibility issue
+* INFO Improve redirects import tool from a CSV file by cleaning original URL if first character is a slash
+* FIX Slug change notice with the Block Editor
+* FIX PHP Warning "new_url"
 
 <a href="https://www.seopress.org/changelog/" target="_blank">View our complete changelog</a>
 <a href="https://www.seopress.org/support/guides/how-to-downgrade-seopress-pro-to-a-previous-version/" target="_blank">Need to downgrade/rollback?</a>
