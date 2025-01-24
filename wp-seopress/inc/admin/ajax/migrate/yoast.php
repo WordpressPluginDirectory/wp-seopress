@@ -2,9 +2,9 @@
 
 defined('ABSPATH') or exit('Please don&rsquo;t call the plugin directly. Thanks :)');
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-//Yoast migration
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/* 
+* Yoast migration
+*/
 function seopress_yoast_migration() {
     check_ajax_referer('seopress_yoast_migrate_nonce', '_ajax_nonce', true);
 
@@ -22,7 +22,7 @@ function seopress_yoast_migration() {
         global $post;
 
         if ($offset > $total_count_posts) {
-            wp_reset_query();
+            wp_reset_postdata();
 
             $yoast_query_terms = get_option('wpseo_taxonomy_meta');
 
@@ -63,7 +63,7 @@ function seopress_yoast_migration() {
                 }
             }
             $offset = 'done';
-            wp_reset_query();
+            wp_reset_postdata();
         } else {
             $args = [
                 'posts_per_page' => $increment,

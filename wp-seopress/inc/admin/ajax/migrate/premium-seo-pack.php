@@ -2,12 +2,9 @@
 
 defined('ABSPATH') or exit('Please don&rsquo;t call the plugin directly. Thanks :)');
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/* Premium SEO Pack migration
-* @since 3.8.7
-* @author Benjamin Denis
+/* 
+* Premium SEO Pack migration
 */
-///////////////////////////////////////////////////////////////////////////////////////////////////
 function seopress_premium_seo_pack_migration() {
     check_ajax_referer('seopress_premium_seo_pack_migrate_nonce', '_ajax_nonce', true);
 
@@ -26,7 +23,7 @@ function seopress_premium_seo_pack_migration() {
 
         if ($offset > $total_count_posts) {
             $count_items = $total_count_posts;
-            wp_reset_query();
+            wp_reset_postdata();
 
             $premium_query_terms = get_option('psp_taxonomy_seo');
 
@@ -61,7 +58,7 @@ function seopress_premium_seo_pack_migration() {
                 }
             }
             $offset = 'done';
-            wp_reset_query();
+            wp_reset_postdata();
         } else {
             $args = [
                 'posts_per_page' => $increment,

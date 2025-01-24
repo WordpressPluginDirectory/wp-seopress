@@ -2,12 +2,9 @@
 
 defined('ABSPATH') or exit('Please don&rsquo;t call the plugin directly. Thanks :)');
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-/* WP Meta SEO migration
-* @since 3.8.2
-* @author Benjamin Denis
+/* 
+* WP Meta SEO migration
 */
-///////////////////////////////////////////////////////////////////////////////////////////////////
 function seopress_wp_meta_seo_migration() {
     check_ajax_referer('seopress_meta_seo_migrate_nonce', '_ajax_nonce', true);
 
@@ -24,7 +21,7 @@ function seopress_wp_meta_seo_migration() {
         global $post;
 
         if ($offset > $total_count_posts) {
-            wp_reset_query();
+            wp_reset_postdata();
             $count_items = $total_count_posts;
 
             $args = [
@@ -45,7 +42,7 @@ function seopress_wp_meta_seo_migration() {
                 }
             }
             $offset = 'done';
-            wp_reset_query();
+            wp_reset_postdata();
         } else {
             $args = [
                 'posts_per_page' => $increment,
