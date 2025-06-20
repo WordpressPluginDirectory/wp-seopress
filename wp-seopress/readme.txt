@@ -6,7 +6,7 @@ Tags: SEO, google search console, xml sitemap, schema, ai
 Requires at least: 5.0+
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 8.7.0.2
+Stable tag: 8.9.0.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -24,7 +24,7 @@ SEOPress is a powerful WordPress SEO plugin to optimize your SEO, boost your tra
 ✔ <strong>Content analysis to help you write content optimized for search engines with unlimited target keywords</strong>
 ✔ <strong><a href="https://www.seopress.org/solutions/migrate-from/" target="_blank">Import your post and term metadatas</a> from other SEO plugins or CSV file in 1 click</strong>
 ✔ <strong><a href="https://translate.wordpress.org/projects/wp-plugins/wp-seopress" target="_blank">Translated into 26 languages (and counting)</strong>
-✔ <strong>Trusted by over 300,000 WordPress websites since 2017</strong>
+✔ <strong>Trusted by over 350,000 WordPress websites since 2017</strong>
 
 <a href="https://www.seopress.org/pricing/" target="_blank"><strong>Buy SEOPress PRO: only $49 / year / 5 sites</strong></a>
 
@@ -271,11 +271,25 @@ You're theme is probably using a deprecated function to handle the title. <a hre
 12. Schema metabox
 
 == Changelog ==
-= 8.7.0.2 <a href="https://www.seopress.org/newsroom/product-news/seopress-8-7/">Read the blog post update</a> =
-* INFO WP 6.8 compatibility
-* FIX Label "SEO notifications counter in admin bar"
-* FIX A regression for Automatic Instant Indexing with IndexNow
-* FIX Canonical check exclusion for XML sitemaps
+= 8.9.0.1 =
+* FIX Undefined variables in XML sitemaps
+* FIX Incorrect last mod date with specific timezone for XML Index Sitemap
+* FIX CSS Z-index for chatbot
+
+= 8.9 <a href="https://www.seopress.org/newsroom/product-news/seopress-8-9/">Read the blog post update</a> =
+* NEW Add our AI chatbot to our settings page to get help faster (PRO)
+* NEW Microsoft Clarity User Consent mode
+* NEW Replace the Referer column by Full Origin in our Redirect Manager: more useful, especially with multidomain/multilingual websites
+* NEW UI for automatic schemas
+* INFO Update Admin Columns PRO integration (minimum version 6.0 is now required). From version 7, the integration will be directly provided by ACP.
+* INFO Add caching to last modified date for XML Index sitemap
+* INFO UI - Add schema keys to automatic schemas (SEO, PRO, Schemas)
+* INFO NEW notice when using Google Indexing API
+* INFO WPML integration improved for automatic translations
+* INFO Image for the hiringOrganization sub-schema in the Job automatic schema is no longer required
+* FIX XML Index sitemap last modified date
+* FIX An issue with Admin Columns PRO
+* FIX A compatibility issue with WP 6.8 and our blocks causing performance issue when scrolling the post content from the Block Editor
 
 <a href="https://www.seopress.org/changelog/" target="_blank">View our complete changelog</a>
 <a href="https://www.seopress.org/support/guides/how-to-downgrade-seopress-pro-to-a-previous-version/" target="_blank">Need to downgrade/rollback?</a>
