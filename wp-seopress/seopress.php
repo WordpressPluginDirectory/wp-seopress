@@ -4,19 +4,19 @@
  * Plugin URI: https://www.seopress.org/
  * Description: One of the best SEO plugins for WordPress.
  * Author: The SEO Guys at SEOPress
- * Version: 9.4.1
+ * Version: 9.7.3
  * Author URI: https://www.seopress.org/
  * License: GPLv3 or later
  * Text Domain: wp-seopress
  * Domain Path: /languages
  * Requires PHP: 7.4
- * Requires at least: 5.0
+ * Requires at least: 6.2
  *
  * @package SEOPress
  */
 
 /*
-	Copyright 2016 - 2025 - Benjamin Denis  (email : contact@seopress.org)
+	Copyright 2016 - 2026 - Benjamin Denis  (email : contact@seopress.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License, version 3, as
@@ -37,7 +37,7 @@ defined( 'ABSPATH' ) || exit( 'Please don’t call the plugin directly. Thanks :
 /**
  * Define constants
  */
-define( 'SEOPRESS_VERSION', '9.4.1' );
+define( 'SEOPRESS_VERSION', '9.7.3' );
 define( 'SEOPRESS_AUTHOR', 'Benjamin Denis' );
 define( 'SEOPRESS_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SEOPRESS_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
@@ -160,16 +160,24 @@ function seopress_plugins_loaded( $hook ) { // phpcs:ignore
 		if ( ! defined( 'SEOPRESS_WL_ADMIN_HEADER' ) || SEOPRESS_WL_ADMIN_HEADER !== false ) {
 			require_once $plugin_dir . 'inc/admin/admin-bar/admin-header.php';
 		}
+
+		// Settings loading spinner - must always be available regardless of white label.
+		if ( ! function_exists( 'seopress_settings_skeleton' ) ) {
+			function seopress_settings_skeleton() {
+				?>
+				<div style="display:flex;justify-content:center;align-items:center;min-height:200px;padding:40px"><span class="spinner is-active" style="float:none"></span></div>
+				<?php
+			}
+		}
+
+		// Load contextual ads.
+		require_once $plugin_dir . 'inc/admin/promotions/contextual-ads.php';
 	}
 
-	// Load options and admin bar.
+	// Load options, sanitization and admin bar.
 	require_once $plugin_dir . 'inc/functions/options.php';
+	require_once $plugin_dir . 'inc/admin/sanitize/Sanitize.php';
 	require_once $plugin_dir . 'inc/admin/admin-bar/admin-bar.php';
-
-	// Load integrations conditionally.
-	if ( did_action( 'elementor/loaded' ) && apply_filters( 'seopress_elementor_integration_enabled', true ) ) {
-		include_once $plugin_dir . 'inc/admin/page-builders/elementor/elementor-addon.php';
-	}
 
 	if ( version_compare( $wp_version, '5.0', '>=' ) ) {
 		include_once $plugin_dir . 'inc/admin/page-builders/gutenberg/blocks.php';
@@ -205,7 +213,7 @@ add_action( 'init', 'seopress_init' );
  */
 function seopress_dyn_variables_init( $variables, $post = '', $is_oembed = false ) {
 	if ( wp_doing_ajax() ) {
-		return;
+		return array();
 	}
 
 	// Ensure the dynamic variables function is loaded.
@@ -217,9 +225,9 @@ function seopress_dyn_variables_init( $variables, $post = '', $is_oembed = false
 		}
 	}
 
-	// If the function still doesn't exist, return null to avoid fatal errors.
+	// If the function still doesn't exist, return empty array to avoid fatal errors.
 	if ( ! function_exists( 'seopress_get_dynamic_variables' ) ) {
-		return null;
+		return array();
 	}
 
 	// Use memoized function for dynamic variable retrieval.
@@ -300,35 +308,61 @@ function seopress_add_admin_options_scripts( $hook ) { // phpcs:ignore
 		wp_enqueue_style( 'seopress-admin-dashboard' );
 	}
 
+	// Promotions CSS and JS on all SEOPress pages.
+	if ( strpos( $page, 'seopress' ) !== false ) {
+		wp_enqueue_style( 'seopress-promotions', plugins_url( 'assets/css/seopress-promotions.css', __FILE__ ), array(), SEOPRESS_VERSION );
+		wp_enqueue_script( 'seopress-promotions', plugins_url( 'assets/js/seopress-promotions.js', __FILE__ ), array( 'jquery' ), SEOPRESS_VERSION, true );
+
+		// Localize promotions script.
+		wp_localize_script(
+			'seopress-promotions',
+			'seopressPromotions',
+			array(
+				'dismiss_nonce'  => wp_create_nonce( 'seopress_dismiss_promotion_nonce' ),
+				'toggle_nonce'   => wp_create_nonce( 'seopress_toggle_promotions_nonce' ),
+				'ajaxurl'        => admin_url( 'admin-ajax.php' ),
+				'stats_endpoint' => \SEOPress\Constants\Promotions::getApiUrl() . '/stats',
+			)
+		);
+
+		// Promo Modal (React component using wp-components).
+		$modal_promotion = seopress_get_service( 'PromotionService' )->getPromotion( 'modal' );
+		if ( $modal_promotion ) {
+			wp_enqueue_script( 'wp-element' );
+			wp_enqueue_script( 'wp-components' );
+			wp_enqueue_style( 'wp-components' );
+			wp_enqueue_script(
+				'seopress-promo-modal',
+				plugins_url( 'assets/js/seopress-promo-modal.js', __FILE__ ),
+				array( 'wp-element', 'wp-components' ),
+				SEOPRESS_VERSION,
+				true
+			);
+
+			// Pass modal promotion data.
+			wp_localize_script(
+				'seopress-promo-modal',
+				'seopressPromoModal',
+				array(
+					'promotion' => array(
+						'id'               => $modal_promotion['id'] ?? '',
+						'title'            => $modal_promotion['content']['title'] ?? '',
+						'body'             => $modal_promotion['content']['body'] ?? '',
+						'cta_text'         => $modal_promotion['content']['cta_text'] ?? '',
+						'cta_url'          => $modal_promotion['content']['cta_url'] ?? '',
+						'icon'             => $modal_promotion['content']['icon'] ?? 'megaphone',
+						'styling'          => $modal_promotion['styling'] ?? array(),
+						'dismissible'      => $modal_promotion['dismissible'] ?? true,
+						'dismiss_duration' => $modal_promotion['dismiss_duration_days'] ?? 30,
+					),
+				)
+			);
+		}
+	}
+
 	// Load common migration scripts for multiple pages.
 	if ( in_array( $page, array( 'seopress-option', 'seopress-import-export' ), true ) ) {
 		$scripts[] = 'seopress-migrate';
-	}
-
-	// Tabs script.
-	$pages_with_tabs = array_map(
-		/**
-		 * Get the page name.
-		 *
-		 * @param string $page
-		 * @return string
-		 */
-		function ( $page ) {
-			return 'seopress-' . $page;
-		},
-		array(
-			'titles',
-			'xml-sitemap',
-			'social',
-			'google-analytics',
-			'advanced',
-			'import-export',
-			'instant-indexing',
-		)
-	);
-
-	if ( in_array( $page, $pages_with_tabs, true ) ) {
-		$scripts[] = 'seopress-tabs';
 	}
 
 	// Load scripts conditionally.
@@ -374,52 +408,6 @@ function seopress_add_admin_options_scripts( $hook ) { // phpcs:ignore
 			);
 			wp_localize_script( 'seopress-dashboard', 'seopressAjaxDisplay', $seopress_display );
 		}
-	}
-
-	// Google Analytics color picker.
-	if ( 'seopress-google-analytics' === $page ) {
-		wp_enqueue_style( 'wp-color-picker' );
-		wp_enqueue_script( 'wp-color-picker-alpha', plugins_url( 'assets/js/wp-color-picker-alpha' . $prefix . '.js', __FILE__ ), array( 'wp-color-picker' ), SEOPRESS_VERSION, true );
-		wp_localize_script(
-			'wp-color-picker-alpha',
-			'wpColorPickerL10n',
-			array(
-				'clear'            => __( 'Clear', 'wp-seopress' ),
-				'clearAriaLabel'   => __( 'Clear color', 'wp-seopress' ),
-				'defaultString'    => __( 'Default', 'wp-seopress' ),
-				'defaultAriaLabel' => __( 'Select default color', 'wp-seopress' ),
-				'pick'             => __( 'Select Color', 'wp-seopress' ),
-				'defaultLabel'     => __( 'Color value', 'wp-seopress' ),
-			),
-		);
-
-		$settings = wp_enqueue_code_editor( array( 'type' => 'text/html' ) );
-		wp_add_inline_script(
-			'code-editor',
-			sprintf(
-				'jQuery(function($) {
-            function initializeEditor(elementId, settings) {
-                var $textarea = $("#" + elementId);
-                if (!$textarea.data("codeMirrorInitialized")) {
-                    wp.codeEditor.initialize(elementId, settings);
-                    $textarea.data("codeMirrorInitialized", true);
-                }
-            }
-            function initializeEditors() {
-                initializeEditor("seopress_google_analytics_other_tracking", %s);
-                initializeEditor("seopress_google_analytics_other_tracking_body", %s);
-                initializeEditor("seopress_google_analytics_other_tracking_footer", %s);
-            }
-            $(document).ready(function() {
-                initializeEditors();
-                setTimeout(initializeEditors, 100);
-            });
-        });',
-				wp_json_encode( $settings ),
-				wp_json_encode( $settings ),
-				wp_json_encode( $settings )
-			)
-		);
 	}
 
 	// Localize migration data once for all migration pages.
@@ -513,7 +501,7 @@ function seopress_add_admin_options_scripts( $hook ) { // phpcs:ignore
 				'jQuery(function($) {
 			function initializeEditor(elementId, settings) {
 				var $textarea = $("#" + elementId);
-				if (!$textarea.data("codeMirrorInitialized")) {
+				if ($textarea.length && !$textarea.data("codeMirrorInitialized")) {
 					wp.codeEditor.initialize(elementId, settings);
 					$textarea.data("codeMirrorInitialized", true);
 				}
@@ -537,6 +525,27 @@ function seopress_add_admin_options_scripts( $hook ) { // phpcs:ignore
 	}
 }
 add_action( 'admin_enqueue_scripts', 'seopress_add_admin_options_scripts', 10, 1 );
+
+/**
+ * Render license renewal modal on SEOPress admin pages.
+ *
+ * @since 9.6.0
+ *
+ * @return void
+ */
+function seopress_render_admin_promotions_modal() {
+	// Only on SEOPress pages.
+	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+
+	if ( empty( $page ) || strpos( $page, 'seopress' ) === false ) {
+		return;
+	}
+
+	// Include and render license modal.
+	require_once SEOPRESS_PLUGIN_DIR_PATH . 'inc/admin/promotions/license-modal.php';
+	seopress_render_license_modal();
+}
+add_action( 'admin_footer', 'seopress_render_admin_promotions_modal' );
 
 /**
  * Admin bar CSS.
@@ -625,6 +634,10 @@ function seopress_admin_body_class( $classes ) {
 
 	// Add white-label class if applicable.
 	if ( defined( 'SEOPRESS_WL_ADMIN_HEADER' ) && SEOPRESS_WL_ADMIN_HEADER === false ) {
+		$classes .= ' seopress-white-label-noheader';
+	}
+
+	if ( '1' === seopress_get_toggle_option( 'white-label' ) ) {
 		$classes .= ' seopress-white-label';
 	}
 

@@ -103,10 +103,6 @@ class RobotSettings implements ExecuteHooks {
 		$params = $request->get_params();
 
 		try {
-
-			// Elementor sync.
-			$elementor = get_post_meta( $id, '_elementor_page_settings', true );
-
 			$data_keys_save = array(
 				'_seopress_robots_index',
 				'_seopress_robots_follow',
@@ -115,6 +111,8 @@ class RobotSettings implements ExecuteHooks {
 				'_seopress_robots_canonical',
 				'_seopress_robots_primary_cat',
 				'_seopress_robots_breadcrumbs',
+				'_seopress_robots_freeze_modified_date',
+				'_seopress_robots_custom_modified_date',
 			);
 
 			foreach ( $metas as $key => $value ) {
@@ -138,6 +136,8 @@ class RobotSettings implements ExecuteHooks {
 					|| '_seopress_robots_imageindex' === $value['key']
 					|| '_seopress_robots_snippet' === $value['key']
 					|| '_seopress_robots_breadcrumbs' === $value['key']
+					|| '_seopress_robots_freeze_modified_date' === $value['key']
+					|| '_seopress_robots_custom_modified_date' === $value['key']
 				) {
 					$item = sanitize_text_field( $item );
 				}
@@ -147,14 +147,33 @@ class RobotSettings implements ExecuteHooks {
 				} else {
 					delete_post_meta( $id, $value['key'] );
 				}
-
-				if ( ! empty( $elementor ) ) {
-					$elementor[ $value['key'] ] = $item;
-				}
 			}
 
-			if ( ! empty( $elementor ) ) {
-				update_post_meta( $id, '_elementor_page_settings', $elementor );
+			// If a custom modified date is set, update post_modified directly.
+			$custom_date = isset( $params['_seopress_robots_custom_modified_date'] )
+				? sanitize_text_field( $params['_seopress_robots_custom_modified_date'] )
+				: '';
+
+			if ( ! empty( $custom_date ) ) {
+				$timestamp = strtotime( $custom_date );
+				if ( $timestamp ) {
+					// Use date() instead of gmdate() since post_modified stores site-local time.
+				$date_local = date( 'Y-m-d H:i:s', $timestamp );
+					$date_gmt   = get_gmt_from_date( $date_local );
+
+					global $wpdb;
+					$wpdb->update(
+						$wpdb->posts,
+						array(
+							'post_modified'     => $date_local,
+							'post_modified_gmt' => $date_gmt,
+						),
+						array( 'ID' => $id ),
+						array( '%s', '%s' ),
+						array( '%d' )
+					);
+					clean_post_cache( $id );
+				}
 			}
 
 			return new \WP_REST_Response(
@@ -205,6 +224,26 @@ class RobotSettings implements ExecuteHooks {
 					)
 				);
 			}
+		}
+
+		// Append post modified dates as extra data.
+		$post = get_post( $id );
+		if ( $post ) {
+			$wp_date_format = get_option( 'date_format' );
+			$wp_time_format = get_option( 'time_format' );
+
+			$data[] = array(
+				'key'   => 'post_modified',
+				'value' => $post->post_modified,
+			);
+			$data[] = array(
+				'key'   => 'post_modified_gmt',
+				'value' => $post->post_modified_gmt,
+			);
+			$data[] = array(
+				'key'   => 'post_modified_formatted',
+				'value' => mysql2date( $wp_date_format . ' ' . $wp_time_format, $post->post_modified ),
+			);
 		}
 
 		return new \WP_REST_Response( $data );

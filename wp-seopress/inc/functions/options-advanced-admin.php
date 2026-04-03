@@ -33,10 +33,10 @@ function seopress_image_seo_cleaning_filename( $filename ) {
 
 		$clean = apply_filters( 'seopress_image_seo_clean_output', $clean );
 
-		$friendly_filename = preg_replace( $char_not_clean, $clean, $filename );
+		$friendly_filename = (string) preg_replace( $char_not_clean, $clean, $filename );
 
 		// After replacement, we destroy the last residues.
-		$friendly_filename = preg_replace( '/\?/', '', $friendly_filename );
+		$friendly_filename = (string) preg_replace( '/\?/', '', $friendly_filename );
 
 		// Remove uppercase.
 		$friendly_filename = strtolower( $friendly_filename );
@@ -74,7 +74,7 @@ function seopress_auto_image_attr( $post_ID, $bulk = false ) {
 			}
 
 			// Sanitize the title: remove hyphens, underscores & extra spaces.
-			$img_attr = preg_replace( '%\s*[-_\s]+\s*%', ' ', $img_attr );
+			$img_attr = (string) preg_replace( '%\s*[-_\s]+\s*%', ' ', $img_attr );
 
 			// Lowercase attributes.
 			$img_attr = strtolower( $img_attr );
@@ -868,37 +868,6 @@ function seopress_bulk_quick_edit_save_post( $post_id ) {
 			update_post_meta( $post_id, '_seopress_robots_follow', 'yes' );
 		} else {
 			delete_post_meta( $post_id, '_seopress_robots_follow' );
-		}
-	}
-
-	// Elementor sync.
-	if ( did_action( 'elementor/loaded' ) ) {
-		$elementor = get_post_meta( $post_id, '_elementor_page_settings', true );
-
-		if ( ! empty( $elementor ) ) {
-			if ( isset( $_REQUEST['seopress_title'] ) ) {
-				$elementor['_seopress_titles_title'] = sanitize_text_field( wp_unslash( $_REQUEST['seopress_title'] ) );
-			}
-			if ( isset( $_REQUEST['seopress_desc'] ) ) {
-				$elementor['_seopress_titles_desc'] = sanitize_textarea_field( wp_unslash( $_REQUEST['seopress_desc'] ) );
-			}
-			if ( isset( $_REQUEST['seopress_noindex'] ) ) {
-				$elementor['_seopress_robots_index'] = 'yes';
-			} else {
-				$elementor['_seopress_robots_index'] = '';
-			}
-			if ( isset( $_REQUEST['seopress_nofollow'] ) ) {
-				$elementor['_seopress_robots_follow'] = 'yes';
-			} else {
-				$elementor['_seopress_robots_follow'] = '';
-			}
-			if ( isset( $_REQUEST['seopress_canonical'] ) ) {
-				$elementor['_seopress_robots_canonical'] = sanitize_url( wp_unslash( $_REQUEST['seopress_canonical'] ) );
-			}
-			if ( isset( $_REQUEST['seopress_tkw'] ) ) {
-				$elementor['_seopress_analysis_target_kw'] = sanitize_text_field( wp_unslash( $_REQUEST['seopress_tkw'] ) );
-			}
-			update_post_meta( $post_id, '_elementor_page_settings', $elementor );
 		}
 	}
 }

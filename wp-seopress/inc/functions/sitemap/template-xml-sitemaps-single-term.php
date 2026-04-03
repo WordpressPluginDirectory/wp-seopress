@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit( 'Please don&rsquo;t call the plugin directly. Than
 seopress_get_service( 'SitemapHeaders' )->printHeaders();
 
 // WPML - Home URL.
-if ( 2 === apply_filters( 'wpml_setting', false, 'language_negotiation_type' ) ) {
+if ( 2 == apply_filters( 'wpml_setting', false, 'language_negotiation_type' ) ) {
 	add_filter(
 		'seopress_sitemaps_home_url',
 		function ( $home_url ) {
@@ -120,7 +120,7 @@ function seopress_xml_sitemap_single_term() {
 
 	remove_all_filters( 'pre_get_posts' );
 
-	$offset = basename( wp_parse_url( $request_uri, PHP_URL_PATH ), '.xml' );
+	$offset = basename( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '.xml' );
 	$offset = preg_match_all( '/\d+/', $offset, $matches );
 	$offset = end( $matches[0] );
 

@@ -32,7 +32,7 @@ function seopress_get_docs_links() {
 		'get_started'          => array(
 			'installation' => array(
 				'ico'   => 'ico-starter-guides',
-				'title' => __( 'Starter guides', 'wp-seopress' ),
+				'title' => __( 'Starter guide', 'wp-seopress' ),
 				'desc'  => __( 'Ready to boost your SEO? Get started in minutes with SEOPress.', 'wp-seopress' ),
 				'link'  => 'https://www.seopress.org/support/guides/get-started-seopress/',
 			),
@@ -76,6 +76,9 @@ function seopress_get_docs_links() {
 			),
 			'deepseek'     => array(
 				'errors' => 'https://www.seopress.org/support/guides/generate-seo-metadata-with-deepseek-ai/',
+			),
+			'llms' => array(
+				'file' => 'https://www.seopress.org/support/guides/edit-your-llmstxt-file/',
 			),
 		),
 		'titles'               => array(
@@ -168,6 +171,7 @@ function seopress_get_docs_links() {
 			'variables'     => 'https://www.seopress.org/support/hooks/filter-predefined-dynamic-variables-for-automatic-schemas/',
 			'custom_fields' => 'https://www.seopress.org/support/hooks/filter-custom-fields-list-in-schemas/',
 			'feature'       => 'https://www.seopress.org/features/structured-data-types/',
+			'carousel'      => 'https://developers.google.com/search/docs/appearance/structured-data/carousel',
 		),
 		'page_speed'           => array(
 			'cwv'    => 'https://www.seopress.org/newsroom/featured-stories/core-web-vitals-and-wordpress-seo/',
@@ -195,6 +199,7 @@ function seopress_get_docs_links() {
 		'alerts'               => array(
 			'introduction'  => 'https://www.seopress.org/features/seo-alerts/',
 			'slack_webhook' => 'https://www.seopress.org/support/guides/how-to-configure-seo-alerts-in-sack-with-seopress-pro/',
+			'rest_api'      => 'https://www.seopress.org/support/guides/get-started-with-the-seopress-rest-api/#request-seo-alerts',
 		),
 		'tools'                => array(
 			'csv_import' => 'https://www.seopress.org/support/guides/import-metadata-from-a-csv-file-with-seopress-pro/',
@@ -257,6 +262,7 @@ function seopress_get_docs_links() {
 		$docs['ai']['errors']             = 'https://www.seopress.org/fr/support/guides/generez-vos-metadonnees-seo-avec-openai/#erreurs-et-solutions';
 		$docs['ai']['openai']['errors']   = 'https://www.seopress.org/fr/support/guides/generez-vos-metadonnees-seo-avec-openai/';
 		$docs['ai']['deepseek']['errors'] = 'https://www.seopress.org/fr/support/guides/generez-des-metadonnees-seo-avec-deepseek-ai/';
+		$docs['ai']['llms']['file']       = 'https://www.seopress.org/fr/support/guides/editer-votre-fichier-llms-txt/';
 
 		$docs['titles']['thumbnail']         = 'https://support.google.com/programmable-search/answer/1626955?hl=fr';
 		$docs['titles']['wrong_meta']        = 'https://www.seopress.org/fr/support/guides/google-utilise-une-balise-titre-meta-description-incorrecte-dans-les-resultats-de-recherche/';
@@ -355,6 +361,7 @@ function seopress_get_docs_links() {
 
 		$docs['alerts']['introduction']  = 'https://www.seopress.org/fr/fonctionnalites/alertes-seo/';
 		$docs['alerts']['slack_webhook'] = 'https://www.seopress.org/fr/support/guides/configurer-alertes-seo-slack-seopress-pro/';
+		$docs['alerts']['rest_api']      = 'https://www.seopress.org/fr/support/guides/debuter-avec-lapi-rest-seopress/#obtenir-les-alertes-seo';
 
 		$docs['integrations']['all']                        = 'https://www.seopress.org/fr/integrations/';
 		$docs['integrations']['wpml']['translate']          = 'https://www.seopress.org/fr/support/guides/traduire-les-options-de-seopress-avec-wpml-polylang/';

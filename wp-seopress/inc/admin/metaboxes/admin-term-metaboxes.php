@@ -26,7 +26,7 @@ function seopress_display_seo_term_metaboxe() {
 		if ( ! empty( $seopress_tax_key ) ) {
 			$taxonomy = get_taxonomy( $seopress_tax_key );
 			if ( ! empty( $taxonomy ) ) {
-				if ( ! $taxonomy->public ) {
+				if ( ! $taxonomy->public || ! $taxonomy->publicly_queryable ) {
 					return;
 				}
 			}
@@ -175,6 +175,8 @@ function seopress_display_seo_term_metaboxe() {
 		}
 
 		$seopress_robots_canonical                 = get_term_meta( $term->term_id, '_seopress_robots_canonical', true );
+		$seopress_robots_freeze_modified_date      = '';
+		$seopress_robots_custom_modified_date      = '';
 		$seopress_social_fb_title                  = get_term_meta( $term->term_id, '_seopress_social_fb_title', true );
 		$seopress_social_fb_desc                   = get_term_meta( $term->term_id, '_seopress_social_fb_desc', true );
 		$seopress_social_fb_img                    = get_term_meta( $term->term_id, '_seopress_social_fb_img', true );

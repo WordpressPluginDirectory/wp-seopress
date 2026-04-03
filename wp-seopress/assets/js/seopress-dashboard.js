@@ -22,7 +22,6 @@ jQuery(document).ready(function ($) {
         "notice-title-tag",
         "notice-enfold",
         "notice-themes",
-        "notice-page-builders",
         "notice-ebooks",
         "notice-integrations",
         "notice-noindex",
@@ -31,6 +30,7 @@ jQuery(document).ready(function ($) {
         "notice-robots-txt",
         "notice-robots-txt-valid",
         "notice-wpml-active",
+        "notice-promotions",
     ]
     notices.forEach(function (item) {
         $('#' + item).on('click', function () {
@@ -71,6 +71,7 @@ jQuery(document).ready(function ($) {
         "breadcrumbs",
         "inspect-url",
         "robots",
+        "llms",
         "news",
         "404",
         "bot",
@@ -96,10 +97,16 @@ jQuery(document).ready(function ($) {
                     _ajax_nonce: seopressAjaxToggleFeatures.seopress_nonce,
                 },
                 success: function () {
-                    window.history.pushState("", "", window.location.href + "&settings-updated=true");
-                    $('#seopress-notice-save').show();
-                    $('#seopress-notice-save').delay(3500).fadeOut();
-                    window.history.pushState("", "", window.location.href)
+                    // Use WP notices store on React settings pages, fall back to legacy snackbar.
+                    if (window.wp && window.wp.data && window.wp.data.dispatch('core/notices')) {
+                        window.wp.data.dispatch('core/notices').createSuccessNotice(
+                            seopressAjaxToggleFeatures.i18n?.saved || 'Settings saved successfully.',
+                            { type: 'snackbar', isDismissible: true, id: 'seopress-toggle-success' }
+                        );
+                    } else {
+                        $('#seopress-notice-save').show();
+                        $('#seopress-notice-save').delay(3500).fadeOut();
+                    }
                 },
             });
         });
@@ -172,6 +179,10 @@ jQuery(document).ready(function ($) {
     $('#notice-ebooks').on('click', function () {
         $('#seopress-ebook-panel').toggleClass('is-active');
         $('#notice-ebooks').attr('data-toggle', $('#notice-ebooks').attr('data-toggle') == '1' ? '0' : '1');
+    });
+    $('#notice-promotions').on('click', function () {
+        $('#seopress-promotions-panel').toggleClass('is-active');
+        $('#notice-promotions').attr('data-toggle', $('#notice-promotions').attr('data-toggle') == '1' ? '0' : '1');
     });
 });
 
