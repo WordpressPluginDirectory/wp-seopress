@@ -19,9 +19,9 @@ class EnqueueModuleMetabox {
 	public function canEnqueue() { // phpcs:ignore -- TODO: check if method is outside this class before renaming.
 		$response = true;
 
-		// WordPress 6.2+ is required for the universal metabox (React 18 support).
+		// WordPress 6.5+ is required for the universal metabox (stable ProgressBar in @wordpress/components).
 		global $wp_version;
-		if ( version_compare( $wp_version, '6.2', '<' ) ) {
+		if ( version_compare( $wp_version, '6.5', '<' ) ) {
 			return false;
 		}
 
@@ -43,16 +43,43 @@ class EnqueueModuleMetabox {
 			$response = false;
 		}
 
-		if ( isset( $_GET['fb-edit'] ) ) { // phpcs:ignore
-			$response = false;
-		}
-
 		if ( isset( $_GET['brickspreview'] ) ) { // phpcs:ignore
 			$response = false;
 		}
 
 		if ( isset( $_GET['et_bfb'] ) ) { // phpcs:ignore
 			$response = false;
+		}
+
+		// Page builder preview iframes load editor scripts (Backbone /
+		// vendor globals) that conflict with the React beacon when both
+		// are enqueued in the same document. These query parameters are
+		// only set inside the preview frame, so suppressing here keeps
+		// the builder usable while leaving outer builder shells and
+		// regular frontend pages governed by the appearance toggle.
+		if (
+			isset( $_GET['builder_id'] )                                   // phpcs:ignore -- preview iframe
+			|| isset( $_GET['fbpreview'] )                                 // phpcs:ignore -- preview iframe (alt)
+			|| ( isset( $_GET['builder'] ) && 'true' === $_GET['builder'] ) // phpcs:ignore -- preview iframe
+		) {
+			$response = false;
+		}
+
+		// Avada layout-builder CPT (`fusion_element`). The legacy classic
+		// metaboxes are already removed for this post type by
+		// seopress_remove_metaboxes() in seopress-functions.php. Apply the
+		// same exclusion to the React beacon so editing an Avada layout
+		// element doesn't surface an SEO panel that has nowhere to render.
+		if ( is_admin() ) {
+			$current_post_type = '';
+			if ( isset( $_GET['post_type'] ) ) { // phpcs:ignore
+				$current_post_type = sanitize_key( wp_unslash( $_GET['post_type'] ) ); // phpcs:ignore
+			} elseif ( isset( $_GET['post'] ) ) { // phpcs:ignore
+				$current_post_type = get_post_type( (int) $_GET['post'] ); // phpcs:ignore
+			}
+			if ( 'fusion_element' === $current_post_type ) {
+				$response = false;
+			}
 		}
 
 		if ( ! is_admin() && ! is_singular() ) {
@@ -65,22 +92,6 @@ class EnqueueModuleMetabox {
 
 		if ( get_the_ID() === (int) get_option( 'page_for_posts' ) ) {
 			$response = true;
-		}
-
-		if ( function_exists( 'get_current_screen' ) ) {
-			$current_screen = \get_current_screen();
-
-			if ( $current_screen && method_exists( $current_screen, 'is_block_editor' ) && $current_screen->is_block_editor() === false ) {
-				$response = false;
-			}
-
-			if ( $current_screen && ! seopress_get_service( 'AdvancedOption' )->getAccessUniversalMetaboxGutenberg() && method_exists( $current_screen, 'is_block_editor' ) && $current_screen->is_block_editor() !== false ) {
-				$response = false;
-			}
-		}
-
-		if ( seopress_get_service( 'AdvancedOption' )->getDisableUniversalMetaboxGutenberg() ) {
-			$response = false;
 		}
 
 		if ( ! current_user_can( 'edit_posts' ) ) {
@@ -126,6 +137,12 @@ class EnqueueModuleMetabox {
 		}
 		if ( isset( $_POST['can_enqueue_seopress_metabox'] ) && '1' === $_POST['can_enqueue_seopress_metabox'] ) { // phpcs:ignore
 			$response = true;
+		}
+
+		// Honor the "Hide SEO beacon on frontend" appearance option.
+		// Placed last so it overrides the home/blog page_on_front overrides above.
+		if ( ! is_admin() && '1' === $settings_advanced->getAppearanceUniversalMetaboxFrontendDisable() ) {
+			$response = false;
 		}
 
 		return apply_filters( 'seopress_can_enqueue_universal_metabox', $response );
